@@ -3,11 +3,13 @@ package com.xwallet.xwallet.model.dto;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @Builder
 public class CustomerDTO {
     private Long customerId;
-    private List<AccountDTO> accounts;
+    private String customerName;
+    private String customerPhone;
+    private String customerEmail;
+    private String customerAddress;
+    private String customerCity;
 }

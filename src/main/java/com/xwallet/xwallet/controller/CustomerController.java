@@ -1,7 +1,10 @@
 package com.xwallet.xwallet.controller;
 
+import com.xwallet.xwallet.model.dto.CustomerDTO;
 import com.xwallet.xwallet.model.entity.Customer;
 import com.xwallet.xwallet.service.CustomerService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,24 +33,24 @@ public class CustomerController {
         return customerService.getCustomers();
     }
 
-    @GetMapping("/{clientId}")
-    public Customer getCustomer(@PathVariable("clientId") Long clientId) {
-        return customerService.getCustomer(clientId);
+    @GetMapping("/{customerId}")
+    public Customer getCustomer(@PathVariable("customerId") Long customerId) {
+        return customerService.getCustomer(customerId);
     }
 
-    @PostMapping("/{clientId}")
-    public Customer addCustomer(@PathVariable("clientId") Long clientId) {
-        return customerService.addCustomer(clientId);
+    @PostMapping
+    public Customer addCustomer(@RequestBody CustomerDTO customer) {
+        return customerService.addCustomer(customer);
     }
 
-    @PutMapping("/{clientId}")
-    public Customer updateCustomer(@PathVariable("clientId") Long clientId) {
-        return customerService.updateCustomer(clientId);
+    @PutMapping("/{customerId}")
+    public Customer updateCustomer(@PathVariable("customerId") Long customerId, @RequestBody CustomerDTO customer) {
+        return customerService.updateCustomer(customerId, customer);
     }
 
-    @DeleteMapping("/{clientId}")
-    public Void deleteCustomer(@PathVariable("clientId") Long clientId) {
-        return customerService.deleteCustomer(clientId);
+    @DeleteMapping("/{customerId}")
+    public ResponseEntity<HttpStatus> deleteCustomer(@PathVariable("customerId") Long customerId) {
+        return customerService.deleteCustomer(customerId);
     }
 
 
