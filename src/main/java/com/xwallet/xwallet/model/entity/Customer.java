@@ -13,27 +13,27 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Builder
-@Table(name = "CUSTOMERS")
+@Table(name = "customers", schema = "public", catalog = "dbxwallet")
 public class Customer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "CUSTOMER_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "customer_id", nullable = false)
     private Long customerId;
 
-    @Column(name = "CUSTOMER_NAME")
+    @Column(name = "customer_name", length = 50)
     private String customerName;
 
-    @Column(name = "CUSTOMER_PHONE")
+    @Column(name = "customer_phone", length = 20)
     private String customerPhone;
 
-    @Column(name = "CUSTOMER_EMAIL")
+    @Column(name = "customer_email", length = 50)
     private String customerEmail;
 
-    @Column(name = "CUSTOMER_ADDRESS")
+    @Column(name = "customer_address", length = 100)
     private String customerAddress;
 
-    @Column(name = "CUSTOMER_CITY")
+    @Column(name = "customer_city", length = 50)
     private String customerCity;
 
     @OneToMany(targetEntity = Account.class, fetch = FetchType.LAZY, mappedBy = "customer")

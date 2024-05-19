@@ -1,9 +1,9 @@
 package com.xwallet.xwallet.controller;
 
-import com.xwallet.xwallet.model.dto.CustomerDTO;
-import com.xwallet.xwallet.model.dto.CustomersDTO;
-import com.xwallet.xwallet.model.entity.Customer;
-import com.xwallet.xwallet.service.CustomerService;
+import com.xwallet.xwallet.model.dto.AccountDTO;
+import com.xwallet.xwallet.model.dto.AccountsDTO;
+import com.xwallet.xwallet.model.entity.Account;
+import com.xwallet.xwallet.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,15 +20,15 @@ import static com.xwallet.xwallet.utils.Constants.TEST_MESSAGE;
 import static com.xwallet.xwallet.utils.Constants.TEST_METHOD_NAME;
 
 @RestController
-@Tag(name = "customers", description = "Endpoints related to manage customer information.")
-@RequestMapping("/api/v1/customers")
-public class CustomerController {
+@Tag(name = "accounts", description = "Endpoints related to manage account information.")
+@RequestMapping("/api/v1/accounts")
+public class AccountController {
 
     private final String CLASS_NAME = this.getClass().getSimpleName();
-    private final CustomerService customerService;
+    private final AccountService accountService;
 
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
     }
 
     @GetMapping("/test")
@@ -37,79 +37,79 @@ public class CustomerController {
         return TEST_MESSAGE.concat(CLASS_NAME).concat("." + TEST_METHOD_NAME);
     }
 
-    @Operation(summary = "Gets a list of all Customers.")
+    @Operation(summary = "Gets a list of all the Accounts.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                         description = "Successful Response",
-                         content = { @Content(mediaType = "application/json", schema = @Schema(implementation = CustomersDTO.class)) }),
+                    description = "Successful Response",
+                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = AccountsDTO.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content),
             @ApiResponse(responseCode = "500", description = "Server Error", content = @Content)
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Customer> getCustomers() {
-        return customerService.getCustomers();
+    public List<AccountDTO> getAccounts() {
+        return accountService.getAccounts();
     }
 
-    @Operation(summary = "Gets details of one Customer.")
+    @Operation(summary = "Gets details of one Account.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Successful Response",
-                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Customer.class)) }),
+                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Account.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content),
             @ApiResponse(responseCode = "403", description = "Forbidden Access", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Customer not found", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Account not found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Server Error", content = @Content)
     })
-    @GetMapping("/{customerId}")
+    @GetMapping("/{accountId}")
     @ResponseStatus(HttpStatus.OK)
-    public Customer getCustomer(@PathVariable("customerId") Long customerId) {
-        return customerService.getCustomer(customerId);
+    public AccountDTO getAccount(@PathVariable("accountId") Long accountId) {
+        return accountService.getAccount(accountId);
     }
 
-    @Operation(summary = "Adds a new Customer.")
+    @Operation(summary = "Adds one new Account.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
                     description = "Successful Response",
-                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Customer.class)) }),
+                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Account.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content),
             @ApiResponse(responseCode = "403", description = "Forbidden Access", content = @Content),
             @ApiResponse(responseCode = "500", description = "Server Error", content = @Content)
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Customer addCustomer(@RequestBody CustomerDTO customer) {
-        return customerService.addCustomer(customer);
+    public Account addAccount(@RequestBody AccountDTO account) {
+        return accountService.addAccount(account);
     }
 
-    @Operation(summary = "Updates one Customer information.")
+    @Operation(summary = "Updates details of one Account.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Successful Response",
-                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Customer.class)) }),
+                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Account.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content),
             @ApiResponse(responseCode = "403", description = "Forbidden Access", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Customer not found", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Account not found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Server Error", content = @Content)
     })
-    @PutMapping("/{customerId}")
+    @PutMapping("/{accountId}")
     @ResponseStatus(HttpStatus.OK)
-    public Customer updateCustomer(@PathVariable("customerId") Long customerId, @RequestBody CustomerDTO customer) {
-        return customerService.updateCustomer(customerId, customer);
+    public Account updateAccount(@PathVariable("accountId") Long accountId, @RequestBody AccountDTO account) {
+        return accountService.updateAccount(accountId, account);
     }
 
-    @Operation(summary = "Deletes one Customer.")
+    @Operation(summary = "Deletes one Account.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204",
                     description = "Successful Response",
-                    content = { @Content(mediaType = "application/json", schema = @Schema()) }),
+                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Account.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content),
             @ApiResponse(responseCode = "403", description = "Forbidden Access", content = @Content),
             @ApiResponse(responseCode = "500", description = "Server Error", content = @Content)
     })
-    @DeleteMapping("/{customerId}")
+    @DeleteMapping("/{accountId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<HttpStatus> deleteCustomer(@PathVariable("customerId") Long customerId) {
-        return customerService.deleteCustomer(customerId);
+    public ResponseEntity<HttpStatus> deleteAccount(@PathVariable("accountId") Long accountId) {
+        return accountService.deleteAccount(accountId);
     }
 }

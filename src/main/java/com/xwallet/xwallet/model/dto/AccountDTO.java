@@ -8,4 +8,7 @@ import lombok.Data;
 public class AccountDTO {
     private Long accountId;
     private Long customerId;
+    private Double accountBalance;
+    private String accountType;
+    private String accountCurrency;
 }

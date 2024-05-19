@@ -12,25 +12,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Builder
-@Table(name = "ACCOUNTS")
+@Table(name = "accounts", schema = "public", catalog = "dbxwallet")
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "ACCOUNT_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "account_id", nullable = false)
     private Long accountId;
 
-    @Column(name = "ACCOUNT_BALANCE")
+    @Column(name = "account_balance", precision = 2)
     private Double accountBalance;
 
-    @Column(name = "ACCOUNT_TYPE")
+    @Column(name = "account_type", length = 10)
     private String accountType;
 
-    @Column(name = "ACCOUNT_CURRENCY")
+    @Column(name = "account_currency", length = 5)
     private String accountCurrency;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CUSTOMER_ID")
+    @JoinColumn(name = "customer_id")
     @JsonIgnore
     private Customer customer;
 }

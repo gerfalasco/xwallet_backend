@@ -3,13 +3,10 @@ package com.xwallet.xwallet.service;
 import com.xwallet.xwallet.model.dto.CustomerDTO;
 import com.xwallet.xwallet.model.entity.Customer;
 import com.xwallet.xwallet.repository.CustomerRepository;
-import org.apache.coyote.Response;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.management.InstanceAlreadyExistsException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -35,11 +32,11 @@ public class CustomerService {
     }
 
     public Customer addCustomer(CustomerDTO customer) {
-        if(!isValid(customer))
+        if(!isValidCustomer(customer))
             throw new IllegalArgumentException(ILLEGAL_ARGUMENTS_CUSTOMER);
 
         if(customerRepository.findCustomerByCustomerEmail(customer.getCustomerEmail()) != null)
-            throw new RuntimeException(NOT_FOUND_CUSTOMER);
+            throw new RuntimeException(ALREADY_EXISTS_CUSTOMER);
 
         return customerRepository.save(Customer.builder()
                         .customerName(customer.getCustomerName())
@@ -51,7 +48,7 @@ public class CustomerService {
     }
 
     public Customer updateCustomer(Long customerId, CustomerDTO customer) {
-        if(customer == null || customerId == null || isValid(customer))
+        if(customerId == null || !isValidCustomer(customer))
             throw new IllegalArgumentException(ILLEGAL_ARGUMENTS_CUSTOMER);
 
         Customer savedCustomer = customerRepository.findById(customerId)
@@ -68,6 +65,7 @@ public class CustomerService {
     public ResponseEntity<HttpStatus> deleteCustomer(Long customerId) {
         if(customerId == null)
             throw new IllegalArgumentException(ILLEGAL_ARGUMENTS_CUSTOMER);
+
         customerRepository.deleteById(customerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
