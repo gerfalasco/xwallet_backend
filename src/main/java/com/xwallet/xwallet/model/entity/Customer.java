@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Builder
-@Table(name = "customers", schema = "public", catalog = "dbxwallet")
+@Table(name = "customers", schema = "public", catalog = "xcore")
 public class Customer {
 
     @Id

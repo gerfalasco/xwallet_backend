@@ -6,6 +6,7 @@ import com.xwallet.xwallet.repository.CustomerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,6 +32,7 @@ public class CustomerService {
                 .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_CUSTOMER));
     }
 
+    @Transactional
     public Customer addCustomer(CustomerDTO customer) {
         if(!isValidCustomer(customer))
             throw new IllegalArgumentException(ILLEGAL_ARGUMENTS_CUSTOMER);
@@ -47,6 +49,7 @@ public class CustomerService {
                         .build());
     }
 
+    @Transactional
     public Customer updateCustomer(Long customerId, CustomerDTO customer) {
         if(customerId == null || !isValidCustomer(customer))
             throw new IllegalArgumentException(ILLEGAL_ARGUMENTS_CUSTOMER);
@@ -62,6 +65,7 @@ public class CustomerService {
         return customerRepository.save(savedCustomer);
     }
 
+    @Transactional
     public ResponseEntity<HttpStatus> deleteCustomer(Long customerId) {
         if(customerId == null)
             throw new IllegalArgumentException(ILLEGAL_ARGUMENTS_CUSTOMER);

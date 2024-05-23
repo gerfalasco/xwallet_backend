@@ -7,12 +7,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Builder
-@Table(name = "accounts", schema = "public", catalog = "dbxwallet")
+@Table(name = "accounts", schema = "public", catalog = "xcore")
 public class Account {
 
     @Id
@@ -33,4 +35,7 @@ public class Account {
     @JoinColumn(name = "customer_id")
     @JsonIgnore
     private Customer customer;
+
+    @OneToMany(targetEntity = Movement.class, fetch = FetchType.LAZY, mappedBy = "account")
+    private List<Movement> movementListList;
 }

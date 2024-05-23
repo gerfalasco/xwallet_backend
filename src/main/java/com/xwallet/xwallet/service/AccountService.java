@@ -8,6 +8,7 @@ import com.xwallet.xwallet.repository.CustomerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -48,6 +49,7 @@ public class AccountService {
                 .accountType(account.getAccountType()).build();
     }
 
+    @Transactional
     public Account addAccount(AccountDTO account) {
         if(!isValidAccount(account))
             throw new IllegalArgumentException(ILLEGAL_ARGUMENTS_ACCOUNT);
@@ -63,6 +65,7 @@ public class AccountService {
                         .build());
     }
 
+    @Transactional
     public Account updateAccount(Long accountId, AccountDTO account) {
         if(!isValidAccount(account))
             throw new IllegalArgumentException(ILLEGAL_ARGUMENTS_ACCOUNT);
@@ -81,6 +84,7 @@ public class AccountService {
         return accountRepository.save(savedAccount);
     }
 
+    @Transactional
     public ResponseEntity<HttpStatus> deleteAccount(Long accountId) {
         if(accountId == null)
             throw new IllegalArgumentException(ILLEGAL_ARGUMENTS_ACCOUNT);

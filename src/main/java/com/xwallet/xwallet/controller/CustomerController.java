@@ -21,6 +21,7 @@ import static com.xwallet.xwallet.utils.Constants.TEST_METHOD_NAME;
 
 @RestController
 @Tag(name = "customers", description = "Endpoints related to manage customer information.")
+@CrossOrigin(originPatterns = "*")
 @RequestMapping("/api/v1/customers")
 public class CustomerController {
 
