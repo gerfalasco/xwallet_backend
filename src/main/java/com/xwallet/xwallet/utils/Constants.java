@@ -10,11 +10,14 @@ public class Constants {
     public static final String TRANSACTION_DEPOSIT = "deposit";
     public static final String MOVEMENT_TRANSFER = "transfer";
     public static final String MOVEMENT_EXCHANGE = "exchange";
+    public static final String MOVEMENT_INVEST = "invest";
     public static final String TRANSACTION_DESCRIPTION = "Cash movement - ATM/Bank.";
     public static final String TRANSFER_TO_DESCRIPTION = "Transfer made to account ";
     public static final String TRANSFER_FROM_DESCRIPTION = "Transfer received from account ";
     public static final String EXCHANGE_TO_DESCRIPTION = "Exchanged money to ";
     public static final String EXCHANGE_FROM_DESCRIPTION = "Exchanged money from  ";
+    public static final String INVESTMENT_START_DESCRIPTION = "Investment set up.";
+    public static final String INVESTMENT_END_DESCRIPTION = "Investment return.";
     public static final String TEST_MESSAGE = "The following endpoint is responding: ";
     public static final String TEST_METHOD_NAME = "testEndpoint";
     public static final String NOT_FOUND_CUSTOMER = "Customer not found.";

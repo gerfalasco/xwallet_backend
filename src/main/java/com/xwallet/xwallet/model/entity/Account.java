@@ -2,6 +2,7 @@ package com.xwallet.xwallet.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jdk.jfr.Description;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,5 +38,6 @@ public class Account {
     private Customer customer;
 
     @OneToMany(targetEntity = Movement.class, fetch = FetchType.LAZY, mappedBy = "account")
+    @Description(value = "List of movements made from and to the account.")
     private List<Movement> movementListList;
 }

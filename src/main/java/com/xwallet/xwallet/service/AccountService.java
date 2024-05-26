@@ -27,26 +27,13 @@ public class AccountService {
         this.customerRepository = customerRepository;
     }
 
-    public List<AccountDTO> getAccounts() {
-        return accountRepository.findAll()
-                .stream().map(account -> AccountDTO.builder()
-                        .accountId(account.getCustomer().getCustomerId())
-                        .customerId(account.getCustomer().getCustomerId())
-                        .accountBalance(account.getAccountBalance())
-                        .accountCurrency(account.getAccountCurrency())
-                        .accountType(account.getAccountType()).build()).toList();
+    public List<Account> getAccounts() {
+        return accountRepository.findAll();
     }
 
-    public AccountDTO getAccount(Long accountId) {
-        Account account= accountRepository.findById(accountId)
+    public Account getAccount(Long accountId) {
+        return accountRepository.findById(accountId)
                 .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_ACCOUNT));
-
-        return AccountDTO.builder()
-                .accountId(accountId)
-                .customerId(account.getCustomer().getCustomerId())
-                .accountBalance(account.getAccountBalance())
-                .accountCurrency(account.getAccountCurrency())
-                .accountType(account.getAccountType()).build();
     }
 
     @Transactional

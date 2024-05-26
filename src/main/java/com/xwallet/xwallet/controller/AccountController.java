@@ -48,7 +48,7 @@ public class AccountController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<AccountDTO> getAccounts() {
+    public List<Account> getAccounts() {
         return accountService.getAccounts();
     }
 
@@ -64,7 +64,7 @@ public class AccountController {
     })
     @GetMapping("/{accountId}")
     @ResponseStatus(HttpStatus.OK)
-    public AccountDTO getAccount(@PathVariable("accountId") Long accountId) {
+    public Account getAccount(@PathVariable("accountId") Long accountId) {
         return accountService.getAccount(accountId);
     }
 

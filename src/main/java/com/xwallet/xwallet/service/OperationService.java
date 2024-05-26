@@ -1,18 +1,20 @@
 package com.xwallet.xwallet.service;
 
+import com.xwallet.xwallet.model.dto.InvestmentDTO;
 import com.xwallet.xwallet.model.dto.TransactionDTO;
 import com.xwallet.xwallet.model.dto.TransferDTO;
 import com.xwallet.xwallet.model.entity.Account;
+import com.xwallet.xwallet.model.entity.Investment;
 import com.xwallet.xwallet.model.entity.Movement;
-import com.xwallet.xwallet.repository.AccountRepository;
-import com.xwallet.xwallet.repository.CustomerRepository;
-import com.xwallet.xwallet.repository.ExchangeRepository;
-import com.xwallet.xwallet.repository.MovementRepository;
+import com.xwallet.xwallet.repository.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.*;
 
 import static com.xwallet.xwallet.utils.Constants.*;
 
@@ -23,12 +25,14 @@ public class OperationService {
     private final CustomerRepository customerRepository;
     private final MovementRepository movementRepository;
     private final ExchangeRepository exchangeRepository;
+    private final InvestmentRepository investmentRepository;
 
-    public OperationService(AccountRepository accountRepository, CustomerRepository customerRepository, MovementRepository movementRepository, ExchangeRepository exchangeRepository) {
+    public OperationService(AccountRepository accountRepository, CustomerRepository customerRepository, MovementRepository movementRepository, ExchangeRepository exchangeRepository, InvestmentRepository investmentRepository) {
         this.accountRepository = accountRepository;
         this.customerRepository = customerRepository;
         this.movementRepository = movementRepository;
         this.exchangeRepository = exchangeRepository;
+        this.investmentRepository = investmentRepository;
     }
 
     @Transactional
@@ -94,6 +98,7 @@ public class OperationService {
         return accountRepository.save(originAccount);
     }
 
+    @Transactional
     public Account exchangeBalance(TransferDTO exchange) {
         Account originAccount = accountRepository.findById(exchange.getOriginAccountId())
                 .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_ORIGIN_ACCOUNT));
@@ -102,7 +107,8 @@ public class OperationService {
                 .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_DESTINATION_ACCOUNT));
 
         if(originAccount.getCustomer() != destinationAccount.getCustomer() ||
-                !Objects.equals(originAccount.getCustomer().getCustomerId(), exchange.getOriginCustomerId()))
+                !Objects.equals(originAccount.getCustomer().getCustomerId(), exchange.getOriginCustomerId()) ||
+                Objects.equals(originAccount.getAccountCurrency(), destinationAccount.getAccountCurrency()))
             throw new IllegalArgumentException(FORBIDDEN_ACTION);
 
         if(exchange.getAmount() > originAccount.getAccountBalance())
@@ -131,5 +137,64 @@ public class OperationService {
 
         originAccount.setAccountBalance(newOriginBalance);
         return accountRepository.save(originAccount);
+    }
+
+    @Transactional
+    public Map<String, Object> investBalance(InvestmentDTO investment) {
+        Account originAccount = accountRepository.findById(investment.getAccountId())
+                .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_ORIGIN_ACCOUNT));
+
+        if(investment.getInvestmentAmount() > (originAccount.getAccountBalance() - investment.getInvestmentAmount()))
+            throw new IllegalArgumentException(ILLEGAL_ARGUMENTS_INSUFFICIENT);
+
+        double investmentRate = exchangeRepository.findExchangeByOriginAndDestination(originAccount.getAccountCurrency(), originAccount.getAccountCurrency()).getRate();
+        double newBalance = originAccount.getAccountBalance() - investment.getInvestmentAmount();
+
+        originAccount.setAccountBalance(newBalance);
+        accountRepository.save(originAccount);
+
+        investmentRepository.save(Investment.builder()
+                .accountId(originAccount.getAccountId())
+                .customerId(originAccount.getCustomer().getCustomerId())
+                .investmentDays(investment.getInvestmentDays())
+                .investmentStartDate(Date.valueOf(LocalDate.now()))
+                .investmentEndDate(Date.valueOf(LocalDate.now().plusDays(investment.getInvestmentDays())))
+                .investmentAmount(investment.getInvestmentAmount())
+                .investmentRate(investmentRate)
+                .build());
+
+        movementRepository.save(Movement.builder()
+                .account(originAccount)
+                .movementType(MOVEMENT_INVEST)
+                .movementAmount((-1) * investment.getInvestmentAmount())
+                .movementDescription(INVESTMENT_START_DESCRIPTION)
+                .build());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("statusCode", HttpStatus.CREATED);
+        response.put("description", INVESTMENT_START_DESCRIPTION);
+        return response;
+
+    }
+
+    @Scheduled(cron = "0 0 8 * * MON-FRI")
+    protected void refundInvestment(){
+
+        investmentRepository.findInvestmentsByInvestmentEndDate(Date.valueOf(LocalDate.now()))
+                .stream().map(investment -> {
+                    accountRepository.findById(investment.getAccountId())
+                            .ifPresent(account -> {
+                                Double newBalance = account.getAccountBalance() + investment.getInvestmentAmount() * (investment.getInvestmentRate() * investment.getInvestmentDays() / 365);
+                                account.setAccountBalance(newBalance);
+
+                                movementRepository.save(Movement.builder()
+                                        .account(account)
+                                        .movementType(MOVEMENT_INVEST)
+                                        .movementAmount(newBalance)
+                                        .movementDescription(INVESTMENT_END_DESCRIPTION)
+                                        .build());
+                            });
+                    return null;
+                });
     }
 }

@@ -1,5 +1,6 @@
 package com.xwallet.xwallet.controller;
 
+import com.xwallet.xwallet.model.dto.InvestmentDTO;
 import com.xwallet.xwallet.model.dto.TransactionDTO;
 import com.xwallet.xwallet.model.dto.TransferDTO;
 import com.xwallet.xwallet.model.entity.Account;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 import static com.xwallet.xwallet.utils.Constants.TEST_MESSAGE;
 import static com.xwallet.xwallet.utils.Constants.TEST_METHOD_NAME;
@@ -81,6 +84,22 @@ public class OperationController {
     @ResponseStatus(HttpStatus.OK)
     public Account exchangeBalance(@RequestBody TransferDTO exchange){
         return operationService.exchangeBalance(exchange);
+    }
+
+    @Operation(summary = "Invests money for a period of time, for a return of investment.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Successful Response",
+                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class)) }),
+            @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden Access", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Account Not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = @Content)
+    })
+    @PostMapping("/investments")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, Object> investBalance(@RequestBody InvestmentDTO investment){
+        return operationService.investBalance(investment);
     }
 
 }
