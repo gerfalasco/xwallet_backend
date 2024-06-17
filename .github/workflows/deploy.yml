@@ -24,6 +24,13 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+    - name: Verify SSH connection
+      run: ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "echo 'SSH connection successful'"
+
     - name: SSH into EC2 instance and perform git pull
       run: |
-         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "cd C:/inetpub/wwwroot/core-back.deliver.ar && git fetch origin && git reset --hard origin/develop"
+         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "cd C:/inetpub/wwwroot/core-back.deliver.ar && git fetch origin && git reset --hard origin/develop && git log -1"
+
+    - name: Check contents of the directory after pull
+      run: |
+         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "dir C:/inetpub/wwwroot/core-back.deliver.ar"
