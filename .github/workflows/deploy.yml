@@ -3,20 +3,27 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - develop
+      - develop  # Cambiado a tu rama principal (develop)
 
 jobs:
   deploy:
-    runs-on: windows-latest
+    runs-on: windows-latest  # Se ejecutará en una máquina Windows
 
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install OpenSSH
+    - name: Install SSH for Windows
+      run: |
+          choco install openssh -y
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+          RefreshEnv  # Actualiza las variables de entorno después de instalar SSH
+
+    - name: Set up SSH connection
       uses: webfactory/ssh-agent@v0.5.4
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Copy files to EC2 instance
-      run: scp -r ./path/to/files/* administrator@44.216.5.15:/cygdrive/c/inetpub/wwwroot/core-back.deliver.ar/ 
+    - name: SSH into EC2 instance and perform git pull
+      run: |
+        ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "cd /inetpub/wwwroot/core-back.deliver.ar && git pull origin develop"
