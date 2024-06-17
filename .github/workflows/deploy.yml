@@ -15,31 +15,39 @@ jobs:
 
     - name: Install SSH for Windows
       run: |
-          choco install openssh -y
-          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-          RefreshEnv  # Actualiza las variables de entorno después de instalar SSH
+        choco install openssh -y
+        Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+        RefreshEnv  # Actualiza las variables de entorno después de instalar SSH
 
     - name: Set up SSH connection
       uses: webfactory/ssh-agent@v0.5.4
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+    - name: Create SSH config file
+      run: |
+        echo "Host ec2-instance" > $HOME/.ssh/config
+        echo "  HostName 44.216.5.15" >> $HOME/.ssh/config
+        echo "  User administrator" >> $HOME/.ssh/config
+        echo "  StrictHostKeyChecking no" >> $HOME/.ssh/config
+        echo "  IdentityFile $HOME/.ssh/id_rsa" >> $HOME/.ssh/config
+
     - name: Verify SSH connection
       run: |
         echo "Starting SSH connection verification"
-        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "echo 'SSH connection successful'"
+        ssh -v ec2-instance "echo 'SSH connection successful'"
       continue-on-error: true
 
     - name: Ensure Git is installed on EC2
       run: |
         echo "Checking if Git is installed"
-        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "git --version || choco install git -y"
+        ssh -v ec2-instance "git --version || choco install git -y"
       continue-on-error: true
 
     - name: Verify initial state of the repository
       run: |
         echo "Verifying initial state of the repository"
-        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "
+        ssh -v ec2-instance "
           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
           git status && \
           git remote -v
@@ -49,7 +57,7 @@ jobs:
     - name: SSH into EC2 instance and perform git pull
       run: |
         echo "Performing git pull"
-        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "
+        ssh -v ec2-instance "
           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
           git config --global --add safe.directory C:/inetpub/wwwroot/core-back.deliver.ar && \
           git fetch origin develop && \
@@ -61,13 +69,13 @@ jobs:
     - name: Check contents of the directory after pull
       run: |
         echo "Checking contents of the directory after pull"
-        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "dir C:/inetpub/wwwroot/core-back.deliver.ar"
+        ssh -v ec2-instance "dir C:/inetpub/wwwroot/core-back.deliver.ar"
       continue-on-error: true
 
     - name: Verify final state of the repository
       run: |
         echo "Verifying final state of the repository"
-        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "
+        ssh -v ec2-instance "
           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
           git status
         "
