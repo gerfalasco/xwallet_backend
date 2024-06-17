@@ -27,10 +27,36 @@ jobs:
     - name: Verify SSH connection
       run: ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "echo 'SSH connection successful'"
 
+    - name: Ensure Git is installed on EC2
+      run: ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "git --version || choco install git -y"
+
+    - name: Verify initial state of the repository
+      run: |
+         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "
+           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
+           git status && \
+           git remote -v
+         "
+
     - name: SSH into EC2 instance and perform git pull
       run: |
-         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "cd C:/inetpub/wwwroot/core-back.deliver.ar && git fetch origin && git reset --hard origin/develop && git log -1"
+         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "
+           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
+           git config --global --add safe.directory C:/inetpub/wwwroot/core-back.deliver.ar && \
+           echo 'Fetching latest changes' && \
+           git fetch origin develop && \
+           echo 'Resetting to the latest changes' && \
+           git reset --hard origin/develop && \
+           git log -1
+         "
 
     - name: Check contents of the directory after pull
       run: |
          ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "dir C:/inetpub/wwwroot/core-back.deliver.ar"
+
+    - name: Verify final state of the repository
+      run: |
+         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "
+           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
+           git status
+         "
