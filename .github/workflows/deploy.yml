@@ -3,89 +3,20 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - develop  # Cambiar a tu rama principal (develop)
+      - develop
 
 jobs:
   deploy:
-    runs-on: windows-latest  # Se ejecutará en una máquina Windows
+    runs-on: windows-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Install SSH for Windows
-      run: |
-        choco install openssh -y
-        Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-        RefreshEnv  # Actualiza las variables de entorno después de instalar SSH
-
-    - name: Set up SSH connection
+    - name: Install OpenSSH
       uses: webfactory/ssh-agent@v0.5.4
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Ensure SSH directory exists
-      run: |
-        if (!(Test-Path -Path $env:USERPROFILE\.ssh)) {
-          New-Item -ItemType Directory -Path $env:USERPROFILE\.ssh
-        }
-      shell: pwsh
-      continue-on-error: true
-
-    - name: Configure SSH
-      run: |
-        $configFile = "$env:USERPROFILE\.ssh\config"
-        if (!(Test-Path -Path $configFile)) {
-          @"
-          Host ec2-instance
-            HostName 44.216.5.15
-            User administrator
-            StrictHostKeyChecking no
-            IdentityFile $env:USERPROFILE\.ssh\id_rsa
-          "@ | Out-File -FilePath $configFile -Encoding utf8
-        }
-      shell: pwsh
-      continue-on-error: true
-
-    - name: Verify SSH connection
-      run: |
-        ssh -v ec2-instance "echo 'SSH connection successful'"
-      continue-on-error: true
-
-    - name: Ensure Git is installed on EC2
-      run: |
-        ssh -v ec2-instance "git --version || choco install git -y"
-      continue-on-error: true
-
-    - name: Verify initial state of the repository
-      run: |
-        ssh -v ec2-instance "
-          cd C:/inetpub/wwwroot/core-back.deliver.ar && \
-          git status && \
-          git remote -v
-        "
-      continue-on-error: true
-
-    - name: SSH into EC2 instance and perform git pull
-      run: |
-        ssh -v ec2-instance "
-          cd C:/inetpub/wwwroot/core-back.deliver.ar && \
-          git config --global --add safe.directory C:/inetpub/wwwroot/core-back.deliver.ar && \
-          git fetch origin develop && \
-          git reset --hard origin/develop && \
-          git log -1
-        "
-      continue-on-error: true
-
-    - name: Check contents of the directory after pull
-      run: |
-        ssh -v ec2-instance "dir C:/inetpub/wwwroot/core-back.deliver.ar"
-      continue-on-error: true
-
-    - name: Verify final state of the repository
-      run: |
-        ssh -v ec2-instance "
-          cd C:/inetpub/wwwroot/core-back.deliver.ar && \
-          git status
-        "
-      continue-on-error: true
+    - name: Copy files to EC2 instance
+      run: scp -r ./path/to/files/* administrator@44.216.5.15:/cygdrive/c/inetpub/wwwroot/core-back.deliver.ar/ 
