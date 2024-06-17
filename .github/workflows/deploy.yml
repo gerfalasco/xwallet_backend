@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - develop  # Cambiado a tu rama principal (develop)
+      - develop  # Cambiar a tu rama principal (develop)
 
 jobs:
   deploy:
@@ -24,30 +24,41 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Create SSH config file
+    - name: Ensure SSH directory exists
       run: |
-        mkdir $HOME/.ssh
-        echo "Host ec2-instance" > $HOME/.ssh/config
-        echo "  HostName 44.216.5.15" >> $HOME/.ssh/config
-        echo "  User administrator" >> $HOME/.ssh/config
-        echo "  StrictHostKeyChecking no" >> $HOME/.ssh/config
-        echo "  IdentityFile $HOME/.ssh/id_rsa" >> $HOME/.ssh/config
+        if (!(Test-Path -Path $env:USERPROFILE\.ssh)) {
+          New-Item -ItemType Directory -Path $env:USERPROFILE\.ssh
+        }
+      shell: pwsh
+      continue-on-error: true
+
+    - name: Configure SSH
+      run: |
+        $configFile = "$env:USERPROFILE\.ssh\config"
+        if (!(Test-Path -Path $configFile)) {
+          @"
+          Host ec2-instance
+            HostName 44.216.5.15
+            User administrator
+            StrictHostKeyChecking no
+            IdentityFile $env:USERPROFILE\.ssh\id_rsa
+          "@ | Out-File -FilePath $configFile -Encoding utf8
+        }
+      shell: pwsh
+      continue-on-error: true
 
     - name: Verify SSH connection
       run: |
-        echo "Starting SSH connection verification"
         ssh -v ec2-instance "echo 'SSH connection successful'"
       continue-on-error: true
 
     - name: Ensure Git is installed on EC2
       run: |
-        echo "Checking if Git is installed"
         ssh -v ec2-instance "git --version || choco install git -y"
       continue-on-error: true
 
     - name: Verify initial state of the repository
       run: |
-        echo "Verifying initial state of the repository"
         ssh -v ec2-instance "
           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
           git status && \
@@ -57,7 +68,6 @@ jobs:
 
     - name: SSH into EC2 instance and perform git pull
       run: |
-        echo "Performing git pull"
         ssh -v ec2-instance "
           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
           git config --global --add safe.directory C:/inetpub/wwwroot/core-back.deliver.ar && \
@@ -69,13 +79,11 @@ jobs:
 
     - name: Check contents of the directory after pull
       run: |
-        echo "Checking contents of the directory after pull"
         ssh -v ec2-instance "dir C:/inetpub/wwwroot/core-back.deliver.ar"
       continue-on-error: true
 
     - name: Verify final state of the repository
       run: |
-        echo "Verifying final state of the repository"
         ssh -v ec2-instance "
           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
           git status
