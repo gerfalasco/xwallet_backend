@@ -26,11 +26,12 @@ jobs:
 
     - name: Create SSH config file
       run: |
-        echo "Host ec2-instance" > $HOME/.ssh/config
-        echo "  HostName 44.216.5.15" >> $HOME/.ssh/config
-        echo "  User administrator" >> $HOME/.ssh/config
-        echo "  StrictHostKeyChecking no" >> $HOME/.ssh/config
-        echo "  IdentityFile $HOME/.ssh/id_rsa" >> $HOME/.ssh/config
+        mkdir $env:USERPROFILE\.ssh
+        echo "Host ec2-instance" > $env:USERPROFILE\.ssh\config
+        echo "  HostName 44.216.5.15" >> $env:USERPROFILE\.ssh\config
+        echo "  User administrator" >> $env:USERPROFILE\.ssh\config
+        echo "  StrictHostKeyChecking no" >> $env:USERPROFILE\.ssh\config
+        echo "  IdentityFile $env:USERPROFILE\.ssh\id_rsa" >> $env:USERPROFILE\.ssh\config
 
     - name: Verify SSH connection
       run: |
