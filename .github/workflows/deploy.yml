@@ -26,45 +26,49 @@ jobs:
 
     - name: Verify SSH connection
       run: |
-         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "echo 'SSH connection successful'"
+        echo "Starting SSH connection verification"
+        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "echo 'SSH connection successful'"
       continue-on-error: true
 
     - name: Ensure Git is installed on EC2
       run: |
-         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "git --version || choco install git -y"
+        echo "Checking if Git is installed"
+        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "git --version || choco install git -y"
       continue-on-error: true
 
     - name: Verify initial state of the repository
       run: |
-         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "
-           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
-           git status && \
-           git remote -v
-         "
+        echo "Verifying initial state of the repository"
+        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "
+          cd C:/inetpub/wwwroot/core-back.deliver.ar && \
+          git status && \
+          git remote -v
+        "
       continue-on-error: true
 
     - name: SSH into EC2 instance and perform git pull
       run: |
-         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "
-           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
-           git config --global --add safe.directory C:/inetpub/wwwroot/core-back.deliver.ar && \
-           echo 'Fetching latest changes' && \
-           git fetch origin develop && \
-           echo 'Resetting to the latest changes' && \
-           git reset --hard origin/develop && \
-           git log -1
-         "
+        echo "Performing git pull"
+        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "
+          cd C:/inetpub/wwwroot/core-back.deliver.ar && \
+          git config --global --add safe.directory C:/inetpub/wwwroot/core-back.deliver.ar && \
+          git fetch origin develop && \
+          git reset --hard origin/develop && \
+          git log -1
+        "
       continue-on-error: true
 
     - name: Check contents of the directory after pull
       run: |
-         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "dir C:/inetpub/wwwroot/core-back.deliver.ar"
+        echo "Checking contents of the directory after pull"
+        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "dir C:/inetpub/wwwroot/core-back.deliver.ar"
       continue-on-error: true
 
     - name: Verify final state of the repository
       run: |
-         ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "
-           cd C:/inetpub/wwwroot/core-back.deliver.ar && \
-           git status
-         "
+        echo "Verifying final state of the repository"
+        ssh -v -o StrictHostKeyChecking=no administrator@44.216.5.15 "
+          cd C:/inetpub/wwwroot/core-back.deliver.ar && \
+          git status
+        "
       continue-on-error: true
