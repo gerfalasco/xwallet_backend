@@ -13,8 +13,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Deploy to Windows Server
-        uses: mikeslinn/github-action-windows-winrm@v0.1.1
+      - name: Run WinRM Command
+        uses: chetan/invoke-winrm@v1
         with:
           hostname: 44.216.5.15  # IP pública de tu instancia EC2
           username: administrator  # Nombre de usuario para acceder a la instancia EC2
@@ -26,4 +26,5 @@ jobs:
             } else {
               git clone https://github.com/gerfalasco/xwallet_backend .
               git checkout develop
+
 
