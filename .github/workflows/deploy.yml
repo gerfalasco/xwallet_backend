@@ -32,14 +32,24 @@ jobs:
               exit 1
           }
 
-          # Execute commands on remote server
+          # Execute commands on remote server with detailed logging
           Invoke-Command -Session $session -ScriptBlock {
-            cd C:\inetpub\wwwroot\core-back.deliver.ar
-            if (Test-Path -Path .git) {
-              git pull origin develop
-            } else {
-              git clone https://github.com/gerfalasco/xwallet_backend .
-              git checkout develop
+            try {
+              cd C:\inetpub\wwwroot\core-back.deliver.ar
+              Write-Output "Navigated to the target directory."
+
+              if (Test-Path -Path .git) {
+                Write-Output "Git repository found. Pulling latest changes."
+                git pull origin develop
+              } else {
+                Write-Output "Git repository not found. Cloning repository."
+                git clone https://github.com/gerfalasco/xwallet_backend .
+                cd xwallet_backend
+                git checkout develop
+              }
+            } catch {
+              Write-Error "An error occurred during the git operations: $_"
+              exit 1
             }
           } -ErrorAction Stop
 
@@ -47,6 +57,7 @@ jobs:
           Remove-PSSession -Session $session
         env:
           WINDOWS_PASSWORD: ${{ secrets.WINDOWS_PASSWORD }}
+
 
 
 
