@@ -24,6 +24,6 @@ jobs:
             if (Test-Path -Path .git) {
               git pull origin develop
             } else {
-              git clone https://github.com/tu-usuario/tu-repo.git .
+              git clone https://github.com/gerfalasco/xwallet_backend .
               git checkout develop
             }
