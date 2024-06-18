@@ -1,29 +1,29 @@
-name: Deploy to EC2
+name: Deploy to EC2 Windows Server
 
 on:
   push:
     branches:
-      - develop  # Cambiado a tu rama principal (develop)
+      - develop
 
 jobs:
   deploy:
-    runs-on: windows-latest  # Se ejecutará en una máquina Windows
+    runs-on: windows-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install SSH for Windows
-      run: |
-          choco install openssh -y
-          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-          RefreshEnv  # Actualiza las variables de entorno después de instalar SSH
-
-    - name: Set up SSH connection
-      uses: webfactory/ssh-agent@v0.5.4
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: SSH into EC2 instance and perform git pull
-      run: |
-        ssh -o StrictHostKeyChecking=no administrator@44.216.5.15 "cd /inetpub/wwwroot/core-back.deliver.ar && git pull origin develop"
+      - name: Deploy to Windows Server
+        uses: mikeslinn/github-action-windows-winrm@v0.1.1
+        with:
+          hostname: 44.216.5.15  # IP pública de tu instancia EC2
+          username: administrator  # Nombre de usuario para acceder a la instancia EC2
+          password: ${{ secrets.WINDOWS_PASSWORD }}  # Contraseña de usuario, almacenada en secretos de GitHub
+          command: |
+            cd C:\inetpub\wwwroot\core-back.deliver.ar
+            if (Test-Path -Path .git) {
+              git pull origin develop
+            } else {
+              git clone https://github.com/tu-usuario/tu-repo.git .
+              git checkout develop
+            }
