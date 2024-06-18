@@ -26,4 +26,4 @@ jobs:
             } else {
               git clone https://github.com/gerfalasco/xwallet_backend .
               git checkout develop
-            }
+
