@@ -1,4 +1,4 @@
-package com.xwallet.xwallet.utils;
+package com.xwallet.xwallet.configuration;
 
 import org.apache.catalina.connector.Connector;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;

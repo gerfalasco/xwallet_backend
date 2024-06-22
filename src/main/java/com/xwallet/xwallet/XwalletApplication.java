@@ -30,5 +30,4 @@ public class XwalletApplication {
 			e.printStackTrace();
 		}
 	}
-
 }

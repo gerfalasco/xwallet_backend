@@ -1,5 +1,7 @@
 package com.xwallet.xwallet.utils;
 
+import software.amazon.awssdk.regions.Region;
+
 public class Constants {
 
     private Constants() {
@@ -30,4 +32,8 @@ public class Constants {
     public static final String ALREADY_EXISTS_CUSTOMER = "Customer already exists.";
     public static final String FORBIDDEN_ACTION = "This action cannot be completed";
     public static final String FORBIDDEN_TRANSFER = "Origin and destination account are not in the same currency.";
+    public static final String AMAZON_SQS_URL = "https://sqs.us-east-1.amazonaws.com/232171128702/ColaCore";
+    public static final String AMAZON_SNS_ARN = "arn:aws:sns:us-east-1:232171128702:CoreSNSTopic";
+    public static final Region REGION = Region.US_EAST_1;
+
 }
