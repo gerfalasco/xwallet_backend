@@ -3,10 +3,7 @@ package com.xwallet.xwallet.controller;
 import com.xwallet.xwallet.service.AmazonService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/amazon")
@@ -20,8 +17,8 @@ public class AmazonController {
         this.amazonService = amazonService;
     }
 
-    @GetMapping("/sendQueue/{message}")
-    public void sendQueue(@PathVariable String message) {
+    @PostMapping("/sendQueue")
+    public void sendQueue(@RequestBody String message) {
         amazonService.sendQueueMessage(String.valueOf(MessageBuilder.withPayload(message).build()));
     }
 

@@ -6,9 +6,9 @@ import lombok.Data;
 @Data
 @Builder
 public class TransferDTO {
-    private Long originAccountId;
-    private Long destinationAccountId;
-    private Long originCustomerId;
+    private String originAccountId;
+    private String destinationAccountId;
+    private String originCustomerId;
     private String transactionType;
     private Double amount;
 }

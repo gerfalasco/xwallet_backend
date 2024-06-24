@@ -1,18 +1,19 @@
 package com.xwallet.xwallet.service;
 
-import com.xwallet.xwallet.model.dto.InvestmentDTO;
-import com.xwallet.xwallet.model.dto.TransactionDTO;
-import com.xwallet.xwallet.model.dto.TransferDTO;
+import com.xwallet.xwallet.model.dto.*;
 import com.xwallet.xwallet.model.entity.Account;
 import com.xwallet.xwallet.model.entity.Investment;
 import com.xwallet.xwallet.model.entity.Movement;
 import com.xwallet.xwallet.repository.*;
+import com.xwallet.xwallet.utils.Validator;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -26,13 +27,15 @@ public class OperationService {
     private final MovementRepository movementRepository;
     private final ExchangeRepository exchangeRepository;
     private final InvestmentRepository investmentRepository;
+    private final AmazonService amazonService;
 
-    public OperationService(AccountRepository accountRepository, CustomerRepository customerRepository, MovementRepository movementRepository, ExchangeRepository exchangeRepository, InvestmentRepository investmentRepository) {
+    public OperationService(AccountRepository accountRepository, CustomerRepository customerRepository, MovementRepository movementRepository, ExchangeRepository exchangeRepository, InvestmentRepository investmentRepository, AmazonService amazonService) {
         this.accountRepository = accountRepository;
         this.customerRepository = customerRepository;
         this.movementRepository = movementRepository;
         this.exchangeRepository = exchangeRepository;
         this.investmentRepository = investmentRepository;
+        this.amazonService = amazonService;
     }
 
     @Transactional
@@ -62,48 +65,63 @@ public class OperationService {
     @Transactional
     public Account transferBalance(TransferDTO transaction) {
 
-        Account originAccount = accountRepository.findById(transaction.getOriginAccountId())
+        Account originAccount = accountRepository.findById(Long.valueOf(transaction.getOriginAccountId()))
                 .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_ORIGIN_ACCOUNT));
 
-        Account destinationAccount = accountRepository.findById(transaction.getDestinationAccountId())
-                .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_DESTINATION_ACCOUNT));
-
-        if(!Objects.equals(transaction.getOriginCustomerId(), originAccount.getCustomer().getCustomerId()))
+        if(!Objects.equals(transaction.getOriginCustomerId(), originAccount.getCustomer().getCustomerId().toString()))
             throw new IllegalArgumentException(FORBIDDEN_ACTION);
-
-        if(!Objects.equals(originAccount.getAccountCurrency(), destinationAccount.getAccountCurrency()))
-            throw new IllegalArgumentException(FORBIDDEN_TRANSFER);
 
         if(transaction.getAmount() > originAccount.getAccountBalance())
             throw new IllegalArgumentException(ILLEGAL_ARGUMENTS_INSUFFICIENT);
+
+        Account destinationAccount;
+        if(Validator.isValidUUID(transaction.getDestinationAccountId())){
+            MessageDTO message = MessageDTO.builder()
+                    .operationType("CreateTransferCoreWallet")
+                    .data(Map.of(
+                            "accountNumber", transaction.getDestinationAccountId(),
+                            "transactionId", java.util.UUID.randomUUID().toString(),
+                            "amount", transaction.getAmount().toString(),
+                            "currency", originAccount.getAccountCurrency(),
+                            "date", Timestamp.from(Instant.now()).toString()
+                    )).build();
+            amazonService.sendNotification(String.valueOf(SnsDTO.builder()
+                    .message(message).build()));
+        } else {
+            destinationAccount = accountRepository.findById(Long.valueOf(transaction.getDestinationAccountId()))
+                    .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_DESTINATION_ACCOUNT));
+
+            if(!Objects.equals(originAccount.getAccountCurrency(), destinationAccount.getAccountCurrency()))
+                throw new IllegalArgumentException(FORBIDDEN_TRANSFER);
+
+            movementRepository.save(Movement.builder()
+                    .account(destinationAccount)
+                    .movementType(MOVEMENT_TRANSFER)
+                    .movementAmount(transaction.getAmount())
+                    .movementDescription(TRANSFER_FROM_DESCRIPTION.concat(originAccount.getAccountId().toString()))
+                    .build());
+
+            destinationAccount.setAccountBalance(destinationAccount.getAccountBalance()+transaction.getAmount());
+            accountRepository.save(destinationAccount);
+        }
 
         movementRepository.save(Movement.builder()
                         .account(originAccount)
                         .movementType(MOVEMENT_TRANSFER)
                         .movementAmount((-1) * transaction.getAmount())
-                        .movementDescription(TRANSFER_TO_DESCRIPTION.concat(destinationAccount.getAccountId().toString()))
+                        .movementDescription(TRANSFER_TO_DESCRIPTION.concat(transaction.getDestinationAccountId()))
                         .build());
 
-        movementRepository.save(Movement.builder()
-                .account(destinationAccount)
-                .movementType(MOVEMENT_TRANSFER)
-                .movementAmount(transaction.getAmount())
-                .movementDescription(TRANSFER_FROM_DESCRIPTION.concat(originAccount.getAccountId().toString()))
-                .build());
-
-        destinationAccount.setAccountBalance(transaction.getAmount());
-        accountRepository.save(destinationAccount);
-
-        originAccount.setAccountBalance((-1) * transaction.getAmount());
+        originAccount.setAccountBalance(originAccount.getAccountBalance() + (-1) * transaction.getAmount());
         return accountRepository.save(originAccount);
     }
 
     @Transactional
     public Account exchangeBalance(TransferDTO exchange) {
-        Account originAccount = accountRepository.findById(exchange.getOriginAccountId())
+        Account originAccount = accountRepository.findById(Long.valueOf(exchange.getOriginAccountId()))
                 .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_ORIGIN_ACCOUNT));
 
-        Account destinationAccount = accountRepository.findById(exchange.getDestinationAccountId())
+        Account destinationAccount = accountRepository.findById(Long.valueOf(exchange.getDestinationAccountId()))
                 .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_DESTINATION_ACCOUNT));
 
         if(originAccount.getCustomer() != destinationAccount.getCustomer() ||

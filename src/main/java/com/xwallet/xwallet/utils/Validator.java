@@ -4,7 +4,14 @@ import com.xwallet.xwallet.model.dto.AccountDTO;
 import com.xwallet.xwallet.model.dto.CustomerDTO;
 import org.springframework.util.StringUtils;
 
+import java.util.regex.Pattern;
+
 public class Validator {
+
+    private static final Pattern UUID_PATTERN = Pattern.compile(
+            "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            Pattern.CASE_INSENSITIVE
+    );
 
     private Validator(){
         throw new IllegalStateException("Utility class");
@@ -23,5 +30,9 @@ public class Validator {
                 StringUtils.hasText(account.getAccountType()) &&
                 StringUtils.hasText(account.getAccountCurrency()) &&
                 account.getAccountBalance()>=0);
+    }
+
+    public static boolean isValidUUID(String uuidStr) {
+        return UUID_PATTERN.matcher(uuidStr).matches();
     }
 }
