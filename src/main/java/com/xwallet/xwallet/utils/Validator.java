@@ -20,9 +20,7 @@ public class Validator {
     public static boolean isValidCustomer(CustomerDTO customer){
         return (customer != null &&
                 StringUtils.hasText(customer.getCustomerName()) &&
-                (StringUtils.hasText(customer.getCustomerPhone()) ||
-                StringUtils.hasText(customer.getCustomerEmail())) &&
-                StringUtils.hasText(customer.getCustomerAddress()));
+                StringUtils.hasText(customer.getCustomerEmail()));
     }
 
     public static boolean isValidAccount(AccountDTO account){

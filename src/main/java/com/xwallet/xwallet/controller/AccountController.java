@@ -24,7 +24,6 @@ import static com.xwallet.xwallet.utils.Constants.TEST_METHOD_NAME;
 @CrossOrigin(originPatterns = "*")
 @RequestMapping("/api/v1/accounts")
 public class AccountController {
-
     private final String CLASS_NAME = this.getClass().getSimpleName();
     private final AccountService accountService;
 

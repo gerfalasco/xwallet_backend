@@ -26,6 +26,8 @@ public class Constants {
     public static final String NOT_FOUND_ACCOUNT = "Account not found.";
     public static final String NOT_FOUND_ORIGIN_ACCOUNT = "Origin account not found.";
     public static final String NOT_FOUND_DESTINATION_ACCOUNT = "Destination account not found.";
+    public static final String NOT_FOUND_EMPLOYEE = "Employee not found.";
+    public static final String ALREADY_EXIST_EMPLOYEE = "Employee already exists.";
     public static final String ILLEGAL_ARGUMENTS_CUSTOMER = "Customer information is not complete.";
     public static final String ILLEGAL_ARGUMENTS_ACCOUNT = "Account information is not complete.";
     public static final String ILLEGAL_ARGUMENTS_INSUFFICIENT = "Not enough balance in the account.";
@@ -35,5 +37,7 @@ public class Constants {
     public static final String AMAZON_SQS_URL = "https://sqs.us-east-1.amazonaws.com/232171128702/ColaCore";
     public static final String AMAZON_SNS_ARN = "arn:aws:sns:us-east-1:232171128702:CoreSNSTopic";
     public static final Region REGION = Region.US_EAST_1;
+    public static final String DEFAULT_PASSWORD = "password";
+
 
 }
